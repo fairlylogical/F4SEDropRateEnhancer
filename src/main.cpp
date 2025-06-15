@@ -62,15 +62,15 @@ extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f
 				if (lvlform->chanceNone < 100) {
 					logger::info("patching the form : {0}", lvlform->GetFormID());
 					lvlform->chanceNone = 0;
-					if (lvlform->leveledLists && lvlform->leveledLists->chanceNone < 100)
-						lvlform->leveledLists->chanceNone = 0;
-					if (lvlform->scriptAddedLists) {
-						for (int i = 0; i < lvlform->scriptListCount; i++) {
-							if (lvlform->scriptAddedLists[i]->chanceNone < 100)
-							lvlform->scriptAddedLists[i]->chanceNone = 0;
-						}
-					}
 				}
+                if (lvlform->leveledLists && lvlform->leveledLists->chanceNone < 100)
+                    lvlform->leveledLists->chanceNone = 0;
+                if (lvlform->scriptAddedLists) {
+                    for (int i = 0; i < lvlform->scriptListCount; i++) {
+                        if (lvlform->scriptAddedLists[i]->chanceNone < 100)
+                            lvlform->scriptAddedLists[i]->chanceNone = 0;
+                    }
+                }
 			}
 		}
 	});
