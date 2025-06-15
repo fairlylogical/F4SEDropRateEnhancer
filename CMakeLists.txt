@@ -2,10 +2,9 @@ cmake_minimum_required(VERSION 3.20)
 
 # ---- Options ----
 
-option(COPY_BUILD "Copy the build output to the Fallout 4 directory." ON)
+option(COPY_BUILD "Copy the build output to the Fallout 4 directory." OFF)
 
 # ---- Cache build vars ----
-
 macro(set_from_environment VARIABLE)
 	if (NOT DEFINED ${VARIABLE} AND DEFINED ENV{${VARIABLE}})
 		set(${VARIABLE} $ENV{${VARIABLE}})
@@ -14,8 +13,6 @@ endmacro()
 
 set_from_environment(Fallout4Path)
 set_from_environment(VCPKG_ROOT)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 if (DEFINED VCPKG_ROOT)
 	set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
@@ -33,7 +30,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL" CACHE 
 # ---- Project ----
 
 project(
-    F4SEDropRateEnhancer
+	F4SEDropRateEnhancer
 	VERSION 1.0.0
 	LANGUAGES CXX
 )
@@ -76,13 +73,12 @@ set(Boost_USE_STATIC_LIBS ON)
 
 # ---- Dependencies ----
 
-# if (NOT TARGET CommonLibF4)
-# 	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../CommonLibF4" CommonLibF4)
-# endif ()
+if (NOT TARGET CommonLibF4)
+	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/CommonLibF4/CommonLibF4" CommonLibF4)
+endif ()
 
 find_package(fmt REQUIRED CONFIG)
 find_package(spdlog REQUIRED CONFIG)
-find_package(commonlibf4 REQUIRED CONFIG)
 
 # ---- Add source files ----
 
@@ -213,15 +209,3 @@ source_group(
 	TREE ${CMAKE_CURRENT_SOURCE_DIR}
 	FILES ${SCRIPT}
 )
-
-
-find_package(Python QUIET)
-#a fda
-if(Python_FOUND)
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                       COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/cmake/rc_be_gone.py
-                       COMMENT "Fixing up compile_commands.json by removing the entry for rc.exe."
-                       VERBATIM)
-else()
-    message(WARNING "Python not found! Post-build script will not be run.")
-endif()

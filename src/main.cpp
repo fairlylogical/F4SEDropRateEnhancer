@@ -54,20 +54,27 @@ extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a
 extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f4se)
 {
 	F4SE::Init(a_f4se);
-    F4SE::GetMessagingInterface()->RegisterListener([](F4SE::MessagingInterface::Message *message) {
-
-        if (message->type == F4SE::MessagingInterface::kGameDataReady) {
-            auto* dataHandler = RE::TESDataHandler::GetSingleton();
-            auto& forms = dataHandler->GetFormArray<RE::TESLevItem>();
-            for (auto* lvlform : forms) {
-                if (lvlform->chanceNone > 0 && lvlform->chanceNone < 100) {
-                logger::info("patching the form : {0}", lvlform->GetFormID());
-                    lvlform->chanceNone = 0;
-                }
-            }
-        }
-    });
+	F4SE::GetMessagingInterface()->RegisterListener([](F4SE::MessagingInterface::Message* message) {
+		if (message->type == F4SE::MessagingInterface::kGameDataReady) {
+			auto* dataHandler = RE::TESDataHandler::GetSingleton();
+			auto& forms = dataHandler->GetFormArray<RE::TESLevItem>();
+			for (auto* lvlform : forms) {
+				if (lvlform->chanceNone < 100) {
+					logger::info("patching the form : {0}", lvlform->GetFormID());
+					lvlform->chanceNone = 0;
+					if (lvlform->leveledLists && lvlform->leveledLists->chanceNone < 100)
+						lvlform->leveledLists->chanceNone = 0;
+					if (lvlform->scriptAddedLists) {
+						for (int i = 0; i < lvlform->scriptListCount; i++) {
+							if (lvlform->scriptAddedLists[i]->chanceNone < 100)
+							lvlform->scriptAddedLists[i]->chanceNone = 0;
+						}
+					}
+				}
+			}
+		}
+	});
 	logger::info("hello world!");
-	
+
 	return true;
 }
